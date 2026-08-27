@@ -1,14 +1,14 @@
 ---
 name: fastpi
-description: hecan 的 pi 全局要求配置:语言与 git commit 规范;codegraph 优先的代码查询约束;pi 推荐安装列表(通用基础设施 + 扩展补齐 Claude Code 内置能力)。
+description: Charles 的 pi 全局要求配置:语言与 git commit 规范;codegraph 优先的代码查询约束;pi 推荐安装列表(通用基础设施 + 扩展补齐 Claude Code 内置能力)。
 metadata:
-  author: hecan
+  author: Charles
   version: "0.4.0"
 ---
 
 # fastpi - pi 全局要求配置
 
-hecan 工作环境的 pi 全局要求(语言/git commit 规范 + 推荐安装列表)。本 skill 是这些约束与列表的**唯一载体**,pi 在本环境工作时应遵循以下规范。
+工作环境的 pi 全局要求(语言/git commit 规范 + 推荐安装列表)。本 skill 是这些约束与列表的**唯一载体**,pi 在本环境工作时应遵循以下规范。
 
 ## 语言要求
 
@@ -21,7 +21,7 @@ git commit 消息必须使用前缀 `[reviewed by $username]`,`$username` 为电
 示例:
 
 ```
-[reviewed by hecan] 新增 xxx 功能
+[reviewed by Charles] 新增 xxx 功能
 [reviewed by nobody] 修复 yyy
 ```
 
