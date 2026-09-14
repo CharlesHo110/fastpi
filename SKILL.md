@@ -3,7 +3,7 @@ name: fastpi
 description: Charles 的 pi 全局要求配置:语言与 git commit 规范;codegraph 优先的代码查询约束;pi 推荐安装列表(通用基础设施 + 扩展补齐 Claude Code 内置能力)。
 metadata:
   author: Charles
-  version: "0.4.0"
+  version: "0.5.0"
 ---
 
 # fastpi - pi 全局要求配置
@@ -51,7 +51,7 @@ git commit 消息必须使用前缀 `[reviewed by $username]`,`$username` 为电
 | pipeline | 内网 plugin | 项目级 | Mermaid(.mmd) flowchart 流水线定义与执行 |
 | superpowers | 公网 skill | 项目级 | obra/superpowers 流程 skill 集;实际按需装子 skill(如 brainstorming),`npx skills add obra/superpowers -a pi` |
 | codegraph | MCP | 用户级 | 代码图谱,语义导航/重构/诊断(非 skill) |
-| rtk | CLI 工具 | 用户级 | Token 优化命令包装器(60-90%;非 skill;当前 v0.35.0 装在 C:\Program Files\rtk\,hook 待 `rtk init -g` 激活) |
+| rtk | CLI 工具 | 用户级 | Token 优化命令包装器(60-90%;非 skill;当前 v0.35.0 装在 C:\Program Files\rtk\;pi 侧由 pi-rtk-optimizer 扩展自动改写命令加 rtk 前缀,rtk 自身 hook 无需激活) |
 
 #### 通用安装命令
 
@@ -64,12 +64,12 @@ npx skills add superpowers -a pi
 ```bash
 # 用户级:codegraph(MCP),先装 codegraph CLI,再注册 stdio MCP 服务器
 # pi 无原生 MCP,需经 pi-mcp-adapter 挂载:在用户级 .mcp.json 加 stdio 服务器
-# command=codegraph, args=["serve","--mcp"]
+# command=codegraph, args=["serve","--mcp"], lifecycle="eager"(启动即自动连接,2026-09-14 起本机启用)
 
 # 用户级:rtk(CLI 工具,Rust Token Killer)
 # - macOS/Linux:brew install rtk-ai/tap/rtk 或 cargo install rtk
 # - Windows:GitHub Releases 下载 rtk-x86_64-pc-windows-msvc.zip 解压,rtk.exe 加入 PATH(当前装在 C:\Program Files\rtk\)
-# 装完用 `rtk init -g` 激活 hook(用户级,一次性;当前状态:CLI v0.35.0 已装但 hook 未激活,每条命令尾部提示 "No hook installed - run `rtk init -g`")
+# `rtk init -g` 仅 Claude Code 等宿主需要;pi 由 pi-rtk-optimizer 扩展改写命令加 rtk 前缀,rtk hook 本身无需激活
 ```
 
 ### 二、pi 专用(扩展补齐 Claude Code 内置能力)
@@ -81,9 +81,9 @@ pi 很多 Claude Code 内置能力需靠**扩展(npm 包,`pi install` 安装,非
 | Task/subagent(并行/链式子代理) | pi-subagents(180K 下载/月;另可选 pi-sub-agent 带 9 个内置代理) | 扩展 | `pi install -g npm:pi-subagents` |
 | WebSearch / WebFetch | pi-web-access(web_search/fetch_content,GitHub URL 自动本地克隆,YouTube/PDF 提取) | 扩展 | `pi install -g npm:pi-web-access` |
 | MCP servers | pi-mcp-adapter(单代理工具省上下文,可直接读 .mcp.json,从 Claude Code/Cursor 导入) | 扩展 | `pi install -g npm:pi-mcp-adapter` |
-| codegraph(代码图谱 MCP) | codegraph CLI + MCP(语义导航/重构/诊断;pi 无原生 MCP,需经 pi-mcp-adapter 挂载,配置同通用列表的 stdio 服务器) | MCP | 先装 codegraph CLI,再在用户级 .mcp.json 加 stdio 服务器 command=codegraph, args=["serve","--mcp"] |
+| codegraph(代码图谱 MCP) | codegraph CLI + MCP(语义导航/重构/诊断;pi 无原生 MCP,需经 pi-mcp-adapter 挂载,配置同通用列表的 stdio 服务器) | MCP | 先装 codegraph CLI,再在用户级 .mcp.json 加 stdio 服务器 command=codegraph, args=["serve","--mcp"], lifecycle="eager"(启动自动连接) |
 | prompt/KV 缓存命中率优化 | pi-cache-optimizer(重排系统提示提升缓存命中、prompt_cache_key 回退、缓存统计页脚、`/cache-optimizer fix` 自动修复;Pi 0.82+) | 扩展 | `pi install -g npm:pi-cache-optimizer`(装后 `/reload`) |
-| Plan mode | badlogic/pi-mono 官方示例扩展 `plan-mode`(examples/extensions/,MIT,需自行拷贝) | 扩展(示例) | 拷贝到用户级扩展目录(~/.pi/agent/extensions/) |
+| Plan mode | badlogic/pi-mono 官方示例扩展 `plan-mode`(examples/extensions/,MIT,需自行拷贝;本机已拷贝但 index.ts.disabled,实际改用下方 npm 包) | 扩展(示例) | 拷贝到用户级扩展目录(~/.pi/agent/extensions/) |
 | Todo/任务跟踪 | pi-subagents 自带;否则用计划文件/TODO.md(superpowers 约定) | — | — |
 | 代码流程能力(TDD/调试/评审/计划) | superpowers skill(见通用列表,pi 已官方适配) | skill | `npx skills add superpowers -a pi -g` |
 | 文档编辑(docx/xlsx/pptx/pdf) | anthropics/skills 官方文档四件套(注意:source-available 参考快照,非开源许可) | skill | `npx skills add anthropics/skills@docx -a pi -g`(xlsx/pptx/pdf 同理),见下方说明 |
@@ -91,7 +91,12 @@ pi 很多 Claude Code 内置能力需靠**扩展(npm 包,`pi install` 安装,非
 | 行锚精确编辑 | pi-hashline-edit(read 返回 LINE#HASH 锚点,edit 按锚点改;pi 0.82+ 内置 hashline-edit 工具的基础) | 扩展 | `pi install -g npm:pi-hashline-edit` |
 | 上下文管理/知识库 | context-mode(ctx_index/ctx_search/ctx_stats,BM25 知识库 + 自动捕获决策/错误/计划;大输出索引化省上下文) | 扩展 | `pi install -g npm:context-mode` |
 | 交互式表单 | pi-interview(interview 工具,多维度决策/需求采集,优于来回聊天) | 扩展 | `pi install -g npm:pi-interview` |
-| Plan mode(包实现) | @plannotator/pi-extension(plan mode 的 npm 包实现,与官方示例 plan-mode 目录可二选一或并存) | 扩展 | `pi install -g npm:@plannotator/pi-extension` |
+| Plan mode(包实现) | @narumitw/pi-plan-mode(当前实际安装,Codex 式只读 /plan 模式) | 扩展 | `pi install -g npm:@narumitw/pi-plan-mode` |
 | rtk 优化(pi 侧) | pi-rtk-optimizer(配合 rtk CLI,pi 会话级 token 优化器) | 扩展 | `pi install -g npm:pi-rtk-optimizer` |
+| Chrome 控制 | pi-chrome(桥接已登录 Chrome:tab 管理/page.evaluate/截图,POST 127.0.0.1:17318;抓登录态页面/微信公众号等) | 扩展 | `pi install -g npm:pi-chrome` |
+| 跨会话记忆 | pi-memory(MEMORY.md/daily log/scratchpad 纯 markdown + qmd 语义搜索;KV cache-stable 注入,零依赖;不做自动事实提取) | 扩展 | `pi install -g npm:pi-memory` |
+| 精确上下文投喂 | @narumitw/pi-file-context(Ctrl+Shift+X 选行范围/changed hunks/git 溯源挂载到下一 prompt) | 扩展 | `pi install -g npm:@narumitw/pi-file-context` |
+
+codegraph 的 MCP 服务器注册文件示例见本仓库 `config/mcp.json`(stdio 服务器,含 lifecycle="eager" 启动自动连接);复制或合并到用户级 `~/.pi/agent/mcp.json` 即可。其余个人配置(settings/models/AGENTS/extensions)为机器本地内容,不入库。
 
 文档编辑 skill 说明:Anthropic 官方仓库 `github.com/anthropics/skills` 的 `docx` / `xlsx` / `pptx` / `pdf` 四个 skill 是 Claude 文档能力的生产级参考实现(创建/编辑/分析,保留格式、公式、修订),pi 侧一律 `-g` 装到用户级。注意其许可为 **source-available 参考快照**(非 Apache 2.0),商用前需确认;skills.sh 上另有社区替代品可回退。
