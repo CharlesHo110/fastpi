@@ -3,7 +3,7 @@ name: fastpi
 description: Charles 的 pi 全局要求配置:语言与 git commit 规范;codegraph 优先的代码查询约束;pi 推荐安装列表(通用基础设施 + 扩展补齐 Claude Code 内置能力)。
 metadata:
   author: Charles
-  version: "0.6.0"
+  version: "0.7.0"
 ---
 
 # fastpi - pi 全局要求配置
@@ -16,13 +16,16 @@ metadata:
 
 ## git commit 消息
 
-git commit 消息必须使用前缀 `[reviewed by $username]`,`$username` 为电脑当前用户名(动态占位符,运行时以 `git config user.name` 或系统用户名替换)。
+commit 消息用中文,简明扼要说明本次改动的目的或内容。**是否加 `[reviewed by <user>]` 前缀,取决于仓库远程地址**:
+
+- **仅当** `git remote -v` 的 origin 包含 `gitlab.bj.tkoffice` 时,commit message 才以 `[reviewed by <user>]` 开头;`<user>` 为电脑当前用户名(`whoami`,如 `hecan`)。
+- **其他仓库**(`codeup.aliyun.com`、`github.com`、`gitee` 等)**不加**此前缀,直接用中文描述即可。
 
 示例:
 
 ```
-[reviewed by Charles] 新增 xxx 功能
-[reviewed by nobody] 修复 yyy
+[reviewed by hecan] 修复登录态过期问题     # 仅 origin 含 gitlab.bj.tkoffice 时
+修复登录态过期问题                         # github / codeup / gitee 等一律不加
 ```
 
 ## 代码查询约束(codegraph 优先)
