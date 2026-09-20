@@ -3,7 +3,7 @@ name: fastpi
 description: Charles 的 pi 全局要求配置:语言与 git commit 规范;codegraph 优先的代码查询约束;pi 推荐安装列表(通用基础设施 + 扩展补齐 Claude Code 内置能力)。
 metadata:
   author: Charles
-  version: "0.5.0"
+  version: "0.6.0"
 ---
 
 # fastpi - pi 全局要求配置
@@ -96,7 +96,51 @@ pi 很多 Claude Code 内置能力需靠**扩展(npm 包,`pi install` 安装,非
 | Chrome 控制 | pi-chrome(桥接已登录 Chrome:tab 管理/page.evaluate/截图,POST 127.0.0.1:17318;抓登录态页面/微信公众号等) | 扩展 | `pi install -g npm:pi-chrome` |
 | 跨会话记忆 | pi-memory(MEMORY.md/daily log/scratchpad 纯 markdown + qmd 语义搜索;KV cache-stable 注入,零依赖;不做自动事实提取) | 扩展 | `pi install -g npm:pi-memory` |
 | 精确上下文投喂 | @narumitw/pi-file-context(Ctrl+Shift+X 选行范围/changed hunks/git 溯源挂载到下一 prompt) | 扩展 | `pi install -g npm:@narumitw/pi-file-context` |
+| 权限门禁(执行前风险裁决) | pi-verdict(三态 allow/ask/deny:内置 deny floor(bash 危险正则 + 路径敏感度 S0-S5)→ 你的 allow/deny 规则 → 模型分类器;fail-closed;零依赖单文件 ~1k 行;不可配置关闭的自保护层;替代已从 npm 下架的 pi-safety-gate) | 扩展 | `pi install -g npm:pi-verdict` |
 
 codegraph 的 MCP 服务器注册文件示例见本仓库 `config/mcp.json`(stdio 服务器,含 lifecycle="eager" 启动自动连接);复制或合并到用户级 `~/.pi/agent/mcp.json` 即可。其余个人配置(settings/models/AGENTS/extensions)为机器本地内容,不入库。
 
 文档编辑 skill 说明:Anthropic 官方仓库 `github.com/anthropics/skills` 的 `docx` / `xlsx` / `pptx` / `pdf` 四个 skill 是 Claude 文档能力的生产级参考实现(创建/编辑/分析,保留格式、公式、修订),pi 侧一律 `-g` 装到用户级。注意其许可为 **source-available 参考快照**(非 Apache 2.0),商用前需确认;skills.sh 上另有社区替代品可回退。
+
+## 当前实际安装快照(2026-09-20 更新)
+
+本机(hecan)pi 0.85.1 实际启用 **14 个 npm 扩展**,均为用户级安装(`pi install npm:<pkg>`,记录于 `~/.pi/agent/settings.json` 的 `packages`,实装于 `~/.pi/agent/npm/node_modules/`):
+
+| 扩展 | 版本 | 用途 |
+|---|---|---|
+| pi-mcp-adapter | 2.34.0 | MCP 挂载 |
+| pi-web-access | 0.30.0 | 联网搜索/抓取 |
+| pi-subagents | 0.70.0 | 子代理编排 |
+| pi-cache-optimizer | 2.8.10 | KV 缓存命中率优化 |
+| pi-goal | 0.1.7 | 目标契约 |
+| pi-hashline-edit | 0.8.3 | 行锚精确编辑 |
+| context-mode | 1.0.169 | 上下文管理/知识库 |
+| pi-interview | 0.12.0 | 交互式表单 |
+| pi-rtk-optimizer | 0.9.0 | rtk 命令改写(pi 侧) |
+| pi-chrome | 0.15.51 | 已登录 Chrome 桥接 |
+| @narumitw/pi-plan-mode | 0.58.1 | 只读 plan 模式 |
+| pi-memory | 0.4.2 | 跨会话记忆 |
+| @narumitw/pi-file-context | 0.54.2 | 精确上下文投喂 |
+| pi-verdict | 0.9.1 | 执行前权限门禁(三态裁决) |
+
+一键复现(用户级,全部装到 npm 扩展目录):
+
+```bash
+for p in pi-mcp-adapter pi-web-access pi-subagents pi-cache-optimizer pi-goal \
+         pi-hashline-edit context-mode pi-interview pi-rtk-optimizer pi-chrome \
+         @narumitw/pi-plan-mode pi-memory @narumitw/pi-file-context pi-verdict; do
+  pi install npm:$p
+done
+```
+
+配套用户级配置(机器本地内容,不入库):
+
+- `~/.pi/agent/mcp.json` —— codegraph stdio 服务器,与本仓库 `config/mcp.json` 一致(`lifecycle="eager"`)。
+- `~/.pi/agent/config/pi-verdict.json` —— pi-verdict 的用户规则:分类器模型 + `allow`/`deny`/`denyPaths`;本机 `classifierModel` 指向轻量模型 `volcengine-coding-plan/glm-5.3-flash`(默认自省 = 会话主模型亲自裁决,每条灰区命令都烧主力额度且更慢)。
+
+备注(选型与前车之鉴):
+
+- `@gotgenes/pi-permission-system` 仍在 npm 依赖中但**未启用**:纯确定性 allow/ask/deny(无 LLM 判定、无延迟),可作 pi-verdict 的规则型替代。
+- `~/.pi/agent/extensions/` 下另有 pi 官方示例扩展 `confirm-destructive` / `dirty-repo-guard` / `git-checkpoint` / `protected-paths`(均为 session 层,不碰 bash 命令),与本扩展清单不冲突。
+- **选包前置校验**:扩展一律先在**实际使用的 registry**(本机 = `repo.huaweicloud.com`)用 `npm view <pkg> version` 验证存在,再 `pi install`。包从 registry 下架会让 `pi update --extensions` **整批** ETARGET 失败(一个包拖垮全量更新);registry 上消失的包必须同时从 `~/.pi/agent/npm/package.json` 依赖里摘除。
+- 替代方案:`pi-safety-gate` 下架后曾用「本地路径包」过渡(`pi install /abs/path`,磁盘副本留在 `~/.pi/agent/local-packages/`),但本地路径包不受 registry 更新、需手工维护,最终改用同为 npm 包的 pi-verdict。

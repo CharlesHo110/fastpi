@@ -1,0 +1,26 @@
+# fastpi 用户级 pi 扩展清单 —— 快照 2026-09-20(pi 0.85.1, 本机 hecan)
+# 用法:逐个 `pi install npm:<name>`,或直接跑 SKILL.md「当前实际安装快照」里的一键复现脚本
+# 校验:安装前先在实机 registry(本机 = repo.huaweicloud.com)执行 `npm view <name> version`
+#
+# 名称@版本                用途
+pi-mcp-adapter@2.34.0      # MCP 挂载(读 .mcp.json,单代理工具省上下文)
+pi-web-access@0.30.0       # web_search / fetch_content
+pi-subagents@0.70.0        # 子代理编排(subagent 工具)
+pi-cache-optimizer@2.8.10  # KV 缓存命中率优化
+pi-goal@0.1.7              # 目标契约(create_goal)
+pi-hashline-edit@0.8.3     # 行锚精确编辑(LINE#HASH)
+context-mode@1.0.169       # 上下文管理 / BM25 知识库
+pi-interview@0.12.0        # 交互式表单(interview)
+pi-rtk-optimizer@0.9.0     # rtk 命令改写(pi 侧)
+pi-chrome@0.15.51          # 已登录 Chrome 桥接
+@narumitw/pi-plan-mode@0.58.1      # 只读 plan 模式
+pi-memory@0.4.2            # 跨会话记忆(MEMORY.md / daily log / scratchpad)
+@narumitw/pi-file-context@0.54.2   # 精确上下文投喂(选行范围/hunks/git 溯源)
+pi-verdict@0.9.1           # 执行前权限门禁(allow/ask/deny 三态裁决)
+
+# 未启用但仍在 ~/.pi/agent/npm/package.json 依赖中:
+# @gotgenes/pi-permission-system  —— 纯确定性 allow/ask/deny,可作 pi-verdict 的规则型替代
+#
+# 非 npm 的用户级基础设施(见 SKILL.md 通用列表):
+# codegraph  —— MCP(stdio, command=codegraph args=["serve","--mcp"] lifecycle=eager),配置文件见 config/mcp.json
+# rtk        —— CLI 工具(当前 v0.35.0,装在 C:\Program Files\rtk\)
