@@ -18,13 +18,13 @@ metadata:
 
 commit 消息用中文,简明扼要说明本次改动的目的或内容。**是否加 `[reviewed by <user>]` 前缀,取决于仓库远程地址**:
 
-- **仅当** `git remote -v` 的 origin 包含 `gitlab.bj.tkoffice` 时,commit message 才以 `[reviewed by <user>]` 开头;`<user>` 为电脑当前用户名(`whoami`,如 `hecan`)。
-- **其他仓库**(`codeup.aliyun.com`、`github.com`、`gitee` 等)**不加**此前缀,直接用中文描述即可。
+- **仅当** `git remote -v` 的 origin 包含 `bj.tkoffice` 时,commit message 才以 `[reviewed by <user>]` 开头;`<user>` 为电脑当前用户名(`whoami`,如 `charles`)。
+- **其他仓库**(`github.com`、`gitee` 等)**不加**此前缀,直接用中文描述即可。
 
 示例:
 
 ```
-[reviewed by hecan] 修复登录态过期问题     # 仅 origin 含 gitlab.bj.tkoffice 时
+[reviewed by hecan] 修复登录态过期问题     # 仅 origin 含 bj.tkoffice 时
 修复登录态过期问题                         # github / codeup / gitee 等一律不加
 ```
 
@@ -107,7 +107,7 @@ codegraph 的 MCP 服务器注册文件示例见本仓库 `config/mcp.json`(stdi
 
 ## 当前实际安装快照(2026-09-20 更新)
 
-本机(hecan)pi 0.85.1 实际启用 **14 个 npm 扩展**,均为用户级安装(`pi install npm:<pkg>`,记录于 `~/.pi/agent/settings.json` 的 `packages`,实装于 `~/.pi/agent/npm/node_modules/`):
+本机pi 0.85.1 实际启用 **14 个 npm 扩展**,均为用户级安装(`pi install npm:<pkg>`,记录于 `~/.pi/agent/settings.json` 的 `packages`,实装于 `~/.pi/agent/npm/node_modules/`):
 
 | 扩展 | 版本 | 用途 |
 |---|---|---|
